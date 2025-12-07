@@ -13,7 +13,7 @@ func main() {
 	logger := log.New(os.Stdout, "ingest: ", log.LstdFlags|log.Lmicroseconds)
 
 	cfg := Config{
-		ProcessorURL: getenv("PROCESSOR_URL", "http://localhost:8081/process"),
+		ProcessorURL: getenv("PROCESSOR_URL", "url to process"),
 		WorkerCount:  5,
 		QueueSize:    100,
 	}
@@ -24,7 +24,7 @@ func main() {
 
 	// start server
 	mux := http.NewServeMux()
-	mux.HandleFunc("/upload", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/ingest", func(w http.ResponseWriter, r *http.Request) {
 		handleUpload(w, r, wp, logger)
 	})
 
