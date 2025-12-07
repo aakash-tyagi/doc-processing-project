@@ -1,16 +1,19 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
+	"time"
 )
 
 func main() {
 	logger := log.New(os.Stdout, "ingest: ", log.LstdFlags|log.Lmicroseconds)
 
 	cfg := Config{
-		ProcessorURL: getenv("", ""),
+		ProcessorURL: getenv("PROCESSOR_URL", "http://localhost:8081/process"),
 		WorkerCount:  5,
 		QueueSize:    100,
 	}
@@ -36,6 +39,17 @@ func main() {
 			logger.Fatalf("server error: %v", err)
 		}
 	}()
+
+	// graceful shutdown
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt)
+	<-stop
+	logger.Println("shutting down")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	srv.Shutdown(ctx)
+	wp.Stop()
 
 }
 

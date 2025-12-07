@@ -32,6 +32,19 @@ func NewWorkerPool(workerSize int) *WorkerPool {
 	}
 }
 
+// Start launches workers.
+func (wp *WorkerPool) Start() {
+	for i := 1; i <= wp.workerSize; i++ {
+		processor := NewProcessor(i)
+
+		go func() {
+			for task := range wp.tasks {
+				processor.Process(task)
+			}
+		}()
+	}
+}
+
 func (wp *WorkerPool) Submit(task Task) {
 	wp.tasks <- task
 }

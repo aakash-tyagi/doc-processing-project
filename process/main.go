@@ -1,24 +1,46 @@
 package main
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 )
 
 func main() {
 
+	pool := NewWorkerPool(5)
+	pool.Start()
+
 	mux := http.NewServeMux()
-	mux.HandleFunc("/process", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("processing request")
-	})
+	mux.HandleFunc("/process", HandleProcess(pool))
 
 	srv := &http.Server{
-		Addr:    ":8082",
+		Addr:    ":8081",
 		Handler: mux,
 	}
 
-	log.Println("Processor Service running on port :8082")
+	// Graceful shutdown
+	go func() {
+		stop := make(chan os.Signal, 1)
+		signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
+		<-stop
+
+		log.Println("Shutting down Processor Service...")
+
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		pool.Close()
+		if err := srv.Shutdown(ctx); err != nil {
+			log.Printf("Server Shutdown Error: %v", err)
+		}
+	}()
+
+	log.Println("Processor Service running on port :8081")
 
 	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatalf("Server error: %v", err)
