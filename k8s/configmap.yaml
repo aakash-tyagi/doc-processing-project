@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ingestion-config
+  namespace: doc-processing
+data:
+  PROCESSOR_URL: "http://process:8081"

@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ingestion
+  namespace: doc-processing
+spec: 
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ingestion
+  template:
+    metadata:
+      labels:
+        app: ingestion
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: ingestion
+          image: ingest-service:latest 
+          ports: 
+            - containerPort: 8080
+          env:
+            - name: PROCESSOR_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: ingestion-config
+                  key: PROCESSOR_URL
+          resources:
+            limits:
+              cpu: "300m"
+              memory: "256Mi"
+              ephemeral-storage: "512Mi"
+            requests:
+              cpu: "150m"
+              memory: "128Mi"
+              ephemeral-storage: "256Mi"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 2
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10

@@ -17,6 +17,10 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/process", HandleProcess(pool))
+	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("OK"))
+	})
 
 	srv := &http.Server{
 		Addr:    ":8081",

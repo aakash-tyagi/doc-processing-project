@@ -28,6 +28,11 @@ func main() {
 		handleUpload(w, r, wp, logger)
 	})
 
+	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("OK"))
+	})
+
 	srv := &http.Server{
 		Addr:    ":8080",
 		Handler: mux,
