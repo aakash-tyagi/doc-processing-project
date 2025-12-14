@@ -15,8 +15,10 @@ func main() {
 	pool := NewWorkerPool(5)
 	pool.Start()
 
+	logger := log.New(os.Stdout, "[PROCESS] ", log.LstdFlags|log.Lmicroseconds)
+
 	mux := http.NewServeMux()
-	mux.HandleFunc("/process", HandleProcess(pool))
+	mux.HandleFunc("/process", HandleProcess(pool, logger))
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("OK"))

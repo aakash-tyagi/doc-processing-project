@@ -80,11 +80,12 @@ func (w *WorkerPool) worker(id int) {
 		// forward to processor
 		body := map[string]string{"job_id": j.ID, "content": j.Payload}
 		buf, _ := jsonMarshal(body)
-		req, err := http.NewRequest(http.MethodPost, w.procURL, bytes.NewBuffer(buf))
+		req, err := http.NewRequest(http.MethodPost, w.procURL+"/process", bytes.NewBuffer(buf))
 		if err != nil {
 			w.logger.Println("create req err:", err)
 			continue
 		}
+
 		req.Header.Set("Content-Type", "application/json")
 
 		resp, err := w.client.Do(req)

@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: process
-          image: process-service:latest
+          image: akku001/process-service:v3
           ports:
             - containerPort: 8081
           resources:
