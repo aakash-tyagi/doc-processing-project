@@ -16,7 +16,7 @@ spec:
       automountServiceAccountToken: false
       containers:
         - name: ingestion
-          image: akku001/ingest-service:v5
+          image: akku001/ingest-service:v7
           imagePullPolicy: Always
           ports: 
             - containerPort: 8080

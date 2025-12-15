@@ -8,7 +8,8 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o ingestion .
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+    go build -o ingestion ./ingestion
 
 # --- Stage 2: Run ---
 FROM alpine:3.19

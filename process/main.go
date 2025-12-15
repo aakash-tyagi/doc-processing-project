@@ -8,6 +8,33 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+)
+
+var (
+	jobsReceived = prometheus.NewCounter(
+		prometheus.CounterOpts{
+			Name: "jobs_received_total",
+			Help: "Total number of jobs received",
+		},
+	)
+
+	jobsProcessed = prometheus.NewCounter(
+		prometheus.CounterOpts{
+			Name: "jobs_processed_total",
+			Help: "Total number of jobs processed",
+		},
+	)
+
+	jobProcessingDuration = prometheus.NewHistogram(
+		prometheus.HistogramOpts{
+			Name:    "job_processing_duration_seconds",
+			Help:    "Time taken to process jobs",
+			Buckets: prometheus.DefBuckets,
+		},
+	)
 )
 
 func main() {
@@ -18,6 +45,9 @@ func main() {
 	logger := log.New(os.Stdout, "[PROCESS] ", log.LstdFlags|log.Lmicroseconds)
 
 	mux := http.NewServeMux()
+
+	mux.Handle("/metrics", promhttp.Handler())
+
 	mux.HandleFunc("/process", HandleProcess(pool, logger))
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)

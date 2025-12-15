@@ -3,13 +3,14 @@ FROM golang:1.23.2 AS builder
 
 WORKDIR /app
 
-COPY go.mod ./
+COPY go.mod go.sum ./
 
 RUN go mod download || true
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o process .
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+    go build -o process ./process
 
 # --- Stage 2: Run ---
 FROM alpine:3.19
